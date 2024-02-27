@@ -15,10 +15,11 @@ class MyBot(commands.Bot):
         await self.load_extension("slashcommands")
 
 bot=MyBot(intents=intents, command_prefix="?")
-@bot.command()
+@bot.command(pass_context = True)
+@commands.is_owner()
 async def sync(ctx):
     await ctx.bot.tree.sync()
-    await ctx.send("commands synced, you may need to reload Discord to see them")
+    await ctx.send("Commands synced, you will need to reload Discord to see them")
 
 
 

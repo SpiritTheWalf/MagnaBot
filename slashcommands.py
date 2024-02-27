@@ -14,5 +14,9 @@ class MyCog(commands.Cog):
     async def ping(self, interaction: discord.Interaction) -> None:
         await interaction.response.send_message("Pong!")
 
+    @app_commands.command(name="invite")
+    async def invite(self, interaction: discord.Interaction) -> None:
+        await interaction.response.send_message("Join my server for development updates! https://discord.gg/bYEYvA7R3G")
+
 async def setup(bot: commands.Bot) -> None:
     await bot.add_cog(MyCog(bot))
