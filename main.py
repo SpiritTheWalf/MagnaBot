@@ -49,6 +49,7 @@ async def on_ready():
     for command in bot.commands:
         print(command.name)
     members = 0
+
     for guild in bot.guilds:
         members += guild.member_count - 1
     await bot.change_presence(activity=discord.Activity(
@@ -56,6 +57,7 @@ async def on_ready():
 
         name=f'{members} members'
     ))
+    await bot.change_presence(status=discord.Status.do_not_disturb)
     print('ready!')
 
 

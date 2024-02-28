@@ -1,9 +1,10 @@
 from datetime import datetime
+import pytz
+from pytz import all_timezones, timezone
 
 import discord.app_commands
 from discord import app_commands
 from discord.ext import commands
-
 
 intents = discord.Intents.default()
 intents.members = True
@@ -23,15 +24,15 @@ class MyCog(commands.Cog):
     def __init__(self, bot: commands.Bot):
         self.bot = bot
 
-    @app_commands.command(name="test")
+    @app_commands.command(name="test", description="Is the bot working?")
     async def test(self, interaction: discord.Interaction):
         await interaction.response.send_message("The Bot is working")
 
-    @app_commands.command(name="ping")
+    @app_commands.command(name="ping", description="Prints Pong!" )
     async def ping(self, interaction: discord.Interaction):
         await interaction.response.send_message("Pong!")
 
-    @app_commands.command(name="invite")
+    @app_commands.command(name="invite",description="Prints an invite to this server")
     async def invite(self, interaction: discord.Interaction):
         await interaction.response.send_message("Join my server for development updates! https://discord.gg/bYEYvA7R3G")
 
@@ -51,7 +52,7 @@ class MyCog(commands.Cog):
 
         await interaction.response.send_message(content=response)
 
-    @app_commands.command()
+    @app_commands.command(name="timenow", description="What is the time in a particular time zone?")
     async def timenow(self, interaction: discord.Interaction, timezone_name: str, ):  # formerly printCurrentTime
         fmt = "%Y-%m-%d %H:%M:%S %Z%z"
 
@@ -75,7 +76,7 @@ class MyCog(commands.Cog):
 
         await interaction.response.send_message(selected_time.strftime(fmt) + f" ({timezone_name})")
 
-    @app_commands.command(name="tzlist")
+    @app_commands.command(name="tzlist", description="Prints all available timezones")
     async def tzlist(self, interaction: discord.Interaction):
         await interaction.response.send_message(
             "The valid timezones are:\n Europe/London\n Europe/Berlin\n CET\n Israel\n Canada/Eastern\n US/Central\n "
