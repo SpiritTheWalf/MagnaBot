@@ -45,7 +45,15 @@ async def on_ready():
     print(f'Logged in as {bot.user.name}')
     for command in bot.commands:
         print(command.name)
+    members = 0
+    for guild in bot.guilds:
+        members += guild.member_count - 1
+    await bot.change_presence(activity = discord.Activity(
+        type = discord.ActivityType.watching,
 
+        name = f'{members} members'
+    ))
+    print('ready!')
 
 @bot.command(pass_context=True)
 @commands.is_owner()
