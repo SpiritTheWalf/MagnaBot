@@ -24,7 +24,6 @@ bot = MyBot(intents=intents, command_prefix="?")
 
 async def setup_bot():
     await bot.load_extension("slashcommands")
-
     await bot.setup_hook()
 
 @bot.event
@@ -54,7 +53,6 @@ async def load(ctx):
 
 async def load_cogs():
     await bot.setup_hook()
-
-setup_bot()
+    await setup_bot()
 bot.run(TOKEN)
 
