@@ -26,15 +26,26 @@ async def setup_bot():
     await bot.load_extension("slashcommands")
     await bot.setup_hook()
 
+@bot.command()
+async def embed(ctx):
+        embed = discord.Embed(
+            title="Title",
+            description="description",
+            color=discord.Color.blue()
+        )
+        embed.add_field(name='Field 1', value= "Value 1", inline=False)
+        embed.add_field(name="Field 2", value="Value 2", inline=True)
+        embed.set_footer(text="Footer text")
+
+        await ctx.send(embed=embed)
+
+
 @bot.event
 async def on_ready():
     print(f'Logged in as {bot.user.name}')
     for command in bot.commands:
         print(command.name)
 
-@bot.event
-async def on_message(message):
-    await bot.process_commands(message)
 
 @bot.command(pass_context=True)
 @commands.is_owner()

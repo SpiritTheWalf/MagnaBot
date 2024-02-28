@@ -1,11 +1,24 @@
+from datetime import datetime
+
 import discord.app_commands
 from discord import app_commands
 from discord.ext import commands
-from datetime import datetime
 from pytz import timezone, all_timezones
 
+intents = discord.Intents.default()
+intents.members = True
+intents.message_content = True
 
-# noinspection PyUnresolvedReferences
+
+class MyBot(commands.Bot):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+
+bot = MyBot(intents=intents, command_prefix="?")
+
+
+# noinspection PyUnresolvedReferences,PyShadowingNames,PyUnusedLocal
 class MyCog(commands.Cog):
     def __init__(self, bot: commands.Bot):
         self.bot = bot
@@ -60,7 +73,30 @@ class MyCog(commands.Cog):
         selected_timezone = timezone(timezone_name)
         selected_time = now_utc.astimezone(selected_timezone)
 
-        await interaction.response.send_message(selected_time.strftime(fmt) + f" ({timezone_name}")
+        await interaction.response.send_message(selected_time.strftime(fmt) + f" ({timezone_name})")
+
+    @app_commands.command(name="tzlist")
+    async def tzlist(self, interaction: discord.Interaction):
+        await interaction.response.send_message(
+            "The valid timezones are:\n Europe/London\n Europe/Berlin\n CET\n Israel\n Canada/Eastern\n US/Central\n "
+            "US/Pacific")
+
+    @app_commands.command(
+        name="embed",
+        description="Create an embed with custom fields"
+    )
+    async def embed(self, inter: commands.Context, title: str, description: str, field1_name: str, field1_value: str,
+                    field2_name: str, field2_value: str):
+        embed = discord.Embed(
+            title=title,
+            description=description,
+            color=discord.Color.blue()
+        )
+
+        embed.add_field(name=field1_name, value=field1_value, inline=False)
+        embed.add_field(name=field2_name, value=field2_value, inline=False)
+        embed.set_footer(text="MagnaBot - Made by SpiritTheWalf")
+        await inter.response.send_message(embed=embed)
 
 
 async def setup(bot: commands.Bot):
