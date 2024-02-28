@@ -1,8 +1,6 @@
 import discord.app_commands
-import pytz
 from discord import app_commands
 from discord.ext import commands
-from discord.ext.commands import bot
 from datetime import datetime
 from pytz import timezone, all_timezones
 
@@ -41,11 +39,11 @@ class MyCog(commands.Cog):
         await interaction.response.send_message(content=response)
 
     @app_commands.command()
-    async def timenow(ctx, timezone_name: str):  # formerly printCurrentTime
+    async def timenow(self, interaction: discord.Interaction, timezone_name: str, ):  # formerly printCurrentTime
         fmt = "%Y-%m-%d %H:%M:%S %Z%z"
 
         if timezone_name not in all_timezones:
-            await ctx.send("Unknown timezone. Please provide a valid timezone name.")
+            await interaction.response.send_message("Unknown timezone. Please provide a valid timezone name.")
 
         # Current time in UTC
         now_utc = datetime.now(timezone('UTC'))
@@ -62,7 +60,7 @@ class MyCog(commands.Cog):
         selected_timezone = timezone(timezone_name)
         selected_time = now_utc.astimezone(selected_timezone)
 
-        await ctx.send(selected_time.strftime(fmt) + f" ({timezone_name}")
+        await interaction.response.send_message(selected_time.strftime(fmt) + f" ({timezone_name}")
 
 
 async def setup(bot: commands.Bot):
