@@ -97,6 +97,7 @@ class MyCog(commands.Cog):
         embed.add_field(name=field2_name, value=field2_value, inline=False)
         embed.set_footer(text="MagnaBot - Made by SpiritTheWalf")
         await inter.response.send_message(embed=embed)
+        return
 
 
 async def setup(bot: commands.Bot):
