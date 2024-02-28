@@ -30,7 +30,7 @@ class MyCog(commands.Cog):
         for cog in self.bot.cogs.values():
             if isinstance(cog, commands.Cog):
                     slash_commands.extend([
-                        command.name for command in cog.get_commands() if isinstance(command, app_commands.Command)
+                        command.name for command in cog.get_app_commands() if isinstance(command, app_commands.Command)
                     ])
 
         response = f"**Normal Commands:**\n{', '.join(normal_commands)}\n\n"

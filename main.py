@@ -32,6 +32,7 @@ async def on_ready():
     print(f'Logged in as {bot.user.name}')
     for command in bot.commands:
         print(command.name)
+
 @bot.event
 async def on_message(message):
     await bot.process_commands(message)
