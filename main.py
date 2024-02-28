@@ -14,6 +14,7 @@ class MyBot(commands.Bot):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
+
     async def setup_hook(self):
         print("Bot is starting")
         await self.load_extension("slashcommands")
@@ -31,7 +32,6 @@ async def on_ready():
     print(f'Logged in as {bot.user.name}')
     for command in bot.commands:
         print(command.name)
-
 @bot.event
 async def on_message(message):
     await bot.process_commands(message)
@@ -48,8 +48,12 @@ async def load(ctx):
     await load_cogs()
     await ctx.send('Cogs loaded!')
 
+
+
+
 async def load_cogs():
     await bot.setup_hook()
 
 setup_bot()
 bot.run(TOKEN)
+
