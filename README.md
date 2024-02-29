@@ -1,4 +1,5 @@
-#MagnaBot
+MagnaBot
+Support server invite link: https://discord.gg/bYEYvA7R3G
 
 This bot was hand coded by SpiritTheWalf and is still very much a WIP
 
