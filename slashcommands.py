@@ -32,7 +32,7 @@ class MyCog(commands.Cog):
     async def ping(self, interaction: discord.Interaction):
         await interaction.response.send_message("Pong!")
 
-    @app_commands.command(name="invite",description="Prints an invite to this server")
+    @app_commands.command(name="invite",description="Prints an invite to the support server")
     async def invite(self, interaction: discord.Interaction):
         await interaction.response.send_message("Join my server for development updates! https://discord.gg/bYEYvA7R3G")
 
