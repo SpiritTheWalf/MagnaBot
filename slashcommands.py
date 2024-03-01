@@ -222,63 +222,61 @@ class MyCog(commands.Cog):
                                               ephemeral=True)
         else:
             await inter.response.send_message(f"{user.display_name} does not have any roles.")
+        @app_commands.command(
+            name="blacklistdomain",
+            description="Add a domain to the blacklist",
+        )
+        async def blacklist_domain(self, inter: discord.Interaction, domain: str):
+            global blacklisted_domains
+            if domain not in blacklisted_domains:
+                blacklisted_domains.append(domain)
+                await inter.response.send_message(f"Domain '{domain}' has been added to the blacklist.", ephemeral=True)
+                # Save updated list to file
+                with open('blacklisted_domains.json', 'w') as file:
+                    json.dump(blacklisted_domains, file)
+            else:
+                await inter.response.send_message(f"Domain '{domain}' is already blacklisted.", ephemeral=True)
 
-    @app_commands.command(
-        name="blacklistdomain",
-        description="Add a domain to the blacklist",
-    )
-    async def blacklist_domain(self, inter: discord.Interaction, domain: str):
-        global blacklisted_domains
-        if domain not in blacklisted_domains:
-            blacklisted_domains.append(domain)
-            await inter.response.send_message(f"Domain '{domain}' has been added to the blacklist.", ephemeral=True)
-            # Save updated list to file
-            with open('blacklisted_domains.json', 'w') as file:
-                json.dump(blacklisted_domains, file)
-        else:
-            await inter.response.send_message(f"Domain '{domain}' is already blacklisted.", ephemeral=True)
+        @commands.Cog.listener()
+        async def on_message(self, message):
+            if message.author == self.bot.user or message.author.guild_permissions.administrator:
+                return  # Ignore messages sent by the bot itself
 
-    @commands.Cog.listener()
-    async def on_message(self, message):
-        if message.author == self.bot.user or message.author.guild_permissions.administrator:
-            return  # Ignore messages sent by the bot itself
+            for domain in blacklisted_domains:
+                if domain in message.content:
+                    server_name = message.guild.name if message.guild else "DM"
+                    # Send DM to the user who sent the message
+                    try:
+                        await message.author.send(
+                            f"The server '{server_name}' does not permit the domain '{domain}' to be posted. "
+                            f"A message has been sent informing the admins and the message has been deleted."
+                        )
+                    except discord.Forbidden:
+                        # If unable to send DM, send the message in the server's channel
+                        await message.channel.send(
+                            f"{message.author.mention}, the server '{server_name}' does not permit the domain '{domain}' "
+                            f"to be posted."
+                            f"A message has been sent informing the admins and the message has been deleted."
+                        )
 
-        for domain in blacklisted_domains:
-            if domain in message.content:
-                server_name = message.guild.name if message.guild else "DM"
-                # Send DM to the user who sent the message
-                try:
-                    await message.author.send(
-                        f"The server '{server_name}' does not permit the domain '{domain}' to be posted. "
-                        f"A message has been sent informing the admins and the message has been deleted."
-                    )
-                except discord.Forbidden:
-                    # If unable to send DM, send the message in the server's channel
-                    await message.channel.send(
-                        f"{message.author.mention}, the server '{server_name}' does not permit the domain '{domain}' "
-                        f"to be posted."
-                        f"A message has been sent informing the admins and the message has been deleted."
-                    )
+                    # Delete the message
+                    await message.delete()
+                    break  # Exit loop after deleting the message
 
-                # Delete the message
-                await message.delete()
-                break  # Exit loop after deleting the message
+        @app_commands.command(
+            name="bldomainlist",
+            description="List all blacklisted domains",
+        )
+        async def blacklist_domain_list(self, inter: discord.Interaction):
+            if not inter.user.guild_permissions.administrator:
+                await inter.response.send_message("You do not have permission to use this command.", ephemeral=True)
+                return
 
-    @app_commands.command(
-        name="bldomainlist",
-        description="List all blacklisted domains",
-    )
-    async def blacklist_domain_list(self, inter: discord.Interaction):
-        if not inter.user.guild_permissions.administrator:
-            await inter.response.send_message("You do not have permission to use this command.", ephemeral=True)
-            return
+            if not blacklisted_domains:
+                await inter.response.send_message("There are no domains blacklisted.", ephemeral=True)
+                return
 
-        if not blacklisted_domains:
-            await inter.response.send_message("There are no domains blacklisted.", ephemeral=True)
-            return
-
-        domains_list = "\n".join(blacklisted_domains)
-        await inter.response.send_message(f"**Blacklisted Domains:**\n{domains_list}", ephemeral=True)
-
+            domains_list = "\n".join(blacklisted_domains)
+            await inter.response.send_message(f"**Blacklisted Domains:**\n{domains_list}", ephemeral=True)
 async def setup(bot: commands.Bot):
-    await bot.add_cog(MyCog(bot))
+        await bot.add_cog(MyCog(bot))
