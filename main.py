@@ -57,7 +57,6 @@ async def on_ready():
 
         name=f'{members} members'
     ))
-    await bot.change_presence(status=discord.Status.do_not_disturb)
     print('ready!')
 
 
@@ -73,6 +72,26 @@ async def load(ctx):
     print('Load command executed!')
     await load_cogs()
     await ctx.send('Cogs loaded!')
+
+
+@bot.command()
+@commands.is_owner()
+async def dotstatus(ctx: commands.Context, status: str):
+    status = status.lower()
+    if status == "online":
+        presence_status = discord.Status.online
+    elif status == "idle":
+        presence_status = discord.Status.idle
+    elif status == "dnd" or status == "do_not_disturb":
+        presence_status = discord.Status.do_not_disturb
+    elif status == "offline":
+        presence_status = discord.Status.invisible
+    else:
+        await ctx.send("Invalid status. Please use one of the following: online, idle, dnd, offline")
+        return
+
+    await bot.change_presence(status=presence_status)
+    await ctx.send(f"Bot presence status set to: {status.capitalize()}")
 
 
 async def load_cogs():
