@@ -17,17 +17,14 @@ class MyBot(commands.Bot):
 
     async def setup_hook(self):
         print("Bot is starting")
-        await self.load_extension("slashcommands")
-        print('Cogs loaded!')
+        if not self.get_cog("slashcommands"):
+            await self.load_extension("slashcommands")
+        if not self.get_cog("log_cog"):
+            await self.load_extension("log_cog")
+        print("Cogs loaded!")
 
 
 bot = MyBot(intents=intents, command_prefix="?")
-
-
-async def setup_bot():
-    await bot.load_extension("slashcommands")
-    await bot.setup_hook()
-
 
 @bot.command()
 async def embed(ctx):
@@ -58,6 +55,7 @@ async def on_ready():
         name=f'{members} members'
     ))
     print('ready!')
+
 
 
 @bot.command(pass_context=True)
@@ -96,7 +94,6 @@ async def dotstatus(ctx: commands.Context, status: str):
 
 async def load_cogs():
     await bot.setup_hook()
-    await setup_bot()
 
 
 bot.run(TOKEN)
