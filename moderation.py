@@ -129,9 +129,112 @@ class ModerationCog(commands.Cog):
         # Send kick embed to default logging channel
         try:
             await self.send_logging_embed(default_channel, guild, user, issuer, reason)
-            await inter.response.send_message(f"{user.mention} has been kicked from the server for: {reason}")
+            await inter.response.send_message(f"{user.mention} has been kicked from the server for: {reason}", ephemeral=True)
         except Exception as e:
-            await inter.response.send_message(f"Failed to send embed to the default logging channel: {e}")
+            await inter.response.send_message(f"Failed to send embed to the default logging channel: {e}",ephemeral=True)
+
+
+    async def send_ban_embed(self, channel, user, issuer, reason):
+        ban_embed = discord.Embed(title="User Banned", color=discord.Color.red())
+        ban_embed.set_thumbnail(url=user.avatar.url)
+        ban_embed.add_field(name="User", value=user.display_name, inline=False)
+        ban_embed.add_field(name="Issuer", value=issuer.display_name, inline=False)
+        ban_embed.add_field(name="Reason", value=reason, inline=False)
+        ban_embed.add_field(name="Timestamp", value=datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S UTC"),
+                            inline=False)
+        await channel.send(embed=ban_embed)
+
+    @app_commands.command(name="ban", description="Ban a user from the server")
+    async def ban_command(self, inter: discord.Interaction, user: discord.Member, reason: str = "No reason provided"):
+        issuer = inter.user
+        guild = inter.guild
+
+        # Check if the issuer has the "Ban Members" permission or is an administrator
+        if not issuer.guild_permissions.ban_members and not issuer.guild_permissions.administrator:
+            await inter.response.send_message("You don't have permission to use this command.")
+            return
+
+        # Send DM to the user
+        try:
+            ban_dm_embed = discord.Embed(title="You have been banned from the server!", color=discord.Color.red())
+            ban_dm_embed.set_thumbnail(url=user.avatar.url)
+            ban_dm_embed.add_field(name="Server", value=guild.name, inline=False)
+            ban_dm_embed.add_field(name="Issuer", value=issuer.display_name, inline=False)
+            ban_dm_embed.add_field(name="Reason", value=reason, inline=False)
+            ban_dm_embed.add_field(name="Timestamp", value=datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S UTC"),
+                                   inline=False)
+            await user.send(embed=ban_dm_embed)
+        except discord.Forbidden:
+            await inter.response.send_message("Failed to send a DM to the user. Make sure they have DMs enabled.")
+
+        # Ban the user
+        try:
+            await user.ban(reason=reason)
+        except discord.Forbidden:
+            await inter.response.send_message("I don't have permission to ban that user.")
+            return
+
+        # Get the default logging channel
+        default_channel_id = await self.get_default_logging_channel(guild.id)
+        if not default_channel_id:
+            await inter.response.send_message("Default logging channel not found.")
+            return
+
+        # Get the default logging channel
+        default_channel = guild.get_channel(default_channel_id)
+        if not default_channel:
+            await inter.response.send_message("Default logging channel not found.")
+            return
+
+        # Send ban embed to default logging channel
+        await self.send_ban_embed(default_channel, user, issuer, reason)
+
+        await inter.response.send_message(f"{user.mention} has been banned from the server for: {reason}")
+
+
+    async def send_unban_embed(self, channel, user, issuer):
+        unban_embed = discord.Embed(title="User Unbanned", color=discord.Color.green())
+        unban_embed.set_thumbnail(url=user.avatar.url)
+        unban_embed.add_field(name="User", value=user.display_name, inline=False)
+        unban_embed.add_field(name="Issuer", value=issuer.display_name, inline=False)
+        unban_embed.add_field(name="Timestamp", value=datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S UTC"),
+                              inline=False)
+        await channel.send(embed=unban_embed)
+
+    @app_commands.command(name="unban", description="Unban a user from the server")
+    async def unban_command(self, inter: discord.Interaction, user: discord.User, reason: str = "No reason provided"):
+        issuer = inter.user
+        guild = inter.guild
+
+        # Check if the issuer has the "Ban Members" permission or is an administrator
+        if not issuer.guild_permissions.ban_members and not issuer.guild_permissions.administrator:
+            await inter.response.send_message("You don't have permission to use this command.")
+            return
+
+        # Unban the user
+        try:
+            await guild.unban(user, reason=reason)
+        except discord.Forbidden:
+            await inter.response.send_message("I don't have permission to unban that user.")
+            return
+
+        # Get the default logging channel
+        default_channel_id = await self.get_default_logging_channel(guild.id)
+        if not default_channel_id:
+            await inter.response.send_message("Default logging channel not found.")
+            return
+
+        # Get the default logging channel
+        default_channel = guild.get_channel(default_channel_id)
+        if not default_channel:
+            await inter.response.send_message("Default logging channel not found.")
+            return
+
+        # Send unban embed to default logging channel
+        await self.send_unban_embed(default_channel, user, issuer)
+
+        await inter.response.send_message(f"{user.mention} has been unbanned from the server.")
+
 
 async def setup(bot: commands.Bot):
     await bot.add_cog(ModerationCog(bot))
