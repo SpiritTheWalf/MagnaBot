@@ -212,7 +212,7 @@ class LoggingCog(commands.Cog):
                 print("Default logging channel ID not found.")
 
     async def send_message_deleted_embed(self, channel, message):
-        if not message.author:
+        if not message.author:  # Check if the message has a valid author
             return
 
         embed = discord.Embed(
@@ -238,8 +238,11 @@ class LoggingCog(commands.Cog):
         if not default_channel:
             return
 
-        # Send message deleted embed to default logging channel
-        await self.send_message_deleted_embed(default_channel, message)
+        # Check if the message is not from the bot itself
+        if message.author != self.bot.user:
+            # Send message deleted embed to default logging channel
+            await self.send_message_deleted_embed(default_channel, message)
+
 
 
 async def setup(bot: commands.Bot):
