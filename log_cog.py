@@ -57,7 +57,7 @@ class LoggingCog(commands.Cog):
         self.save_default_logging_channel(guild.id, channel.id)
         await inter.response.send_message(f"Default logging channel set to {channel.mention}")
 
-    async def send_logging_embed(self, guild, action, member):  # Member joins and leaves
+    async def send_jl_logging_embed(self, guild, action, member):
         channel_id = self.load_default_logging_channel(guild.id)
         if channel_id:
             channel = guild.get_channel(int(channel_id))
@@ -72,7 +72,6 @@ class LoggingCog(commands.Cog):
                 embed.add_field(name="Timestamp", value=datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S UTC"),
                                 inline=False)
                 await channel.send(embed=embed)
-
     async def send_message_edit_logging_embed(self, before, after):  # Edited Messages
         channel_id = self.load_default_logging_channel(after.guild.id)
         if channel_id:
@@ -90,7 +89,7 @@ class LoggingCog(commands.Cog):
                                 inline=False)
                 await channel.send(embed=embed)
 
-    async def send_logging_embed(self, guild, action, target, user):  # Reaction logging
+    async def send_reaction_logging_embed(self, guild, action, target, user):  # Reaction logging
         default_channel_id = self.load_default_logging_channel(guild.id)
         if not default_channel_id:
             return
@@ -113,11 +112,17 @@ class LoggingCog(commands.Cog):
 
     @commands.Cog.listener()
     async def on_member_join(self, member):
-        await self.send_logging_embed(member.guild, "joined", member)
+        guild = member.guild
+        await self.send_jl_logging_embed(guild, "joined", member)
 
     @commands.Cog.listener()
     async def on_member_remove(self, member):
-        await self.send_logging_embed(member.guild, "left", member)
+        guild = member.guild
+        # Check if the member is no longer in the guild due to being kicked
+        if member not in guild.members:
+            await self.send_jl_logging_embed(guild, "kicked", member)
+        else:
+            await self.send_jl_logging_embed(guild, "left", member)
 
     @commands.Cog.listener()
     async def on_message_edit(self, before, after):

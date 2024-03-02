@@ -21,6 +21,8 @@ class MyBot(commands.Bot):
             await self.load_extension("slashcommands")
         if not self.get_cog("log_cog"):
             await self.load_extension("log_cog")
+        if not self.get_cog("moderation"):
+            await self.load_extension("moderation")
         print("Cogs loaded!")
 
 
