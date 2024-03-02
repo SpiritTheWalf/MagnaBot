@@ -49,14 +49,31 @@ async def on_ready():
         print(command.name)
     members = 0
 
+    # Iterate over each guild the bot is in
     for guild in bot.guilds:
         members += guild.member_count - 1
+
+        # Check if the bot's name has changed
+        if guild.me.name != bot.user.name:
+            # Find the bot's member object in the guild
+            me = guild.me
+            try:
+                # Change the bot's nickname to match its updated name
+                await me.edit(nick=bot.user.name)
+                print(f"Nickname updated in {guild.name}")
+            except discord.Forbidden:
+                print(f"Couldn't change nickname in {guild.name} due to lack of permissions.")
+            except Exception as e:
+                print(f"An error occurred while changing nickname in {guild.name}: {e}")
+
+    # Set the bot's presence
     await bot.change_presence(activity=discord.Activity(
         type=discord.ActivityType.watching,
-
         name=f'{members} members'
     ))
-    print('ready!')
+    print('Ready!')
+
+
 
 
 

@@ -72,6 +72,7 @@ class LoggingCog(commands.Cog):
                 embed.add_field(name="Timestamp", value=datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S UTC"),
                                 inline=False)
                 await channel.send(embed=embed)
+
     async def send_message_edit_logging_embed(self, before, after):  # Edited Messages
         channel_id = self.load_default_logging_channel(after.guild.id)
         if channel_id:
@@ -199,7 +200,8 @@ class LoggingCog(commands.Cog):
                         )
                         embed.add_field(name="User", value=member.mention, inline=False)
                         embed.add_field(name="Voice Channel", value=voice_channel.mention, inline=False)
-                        embed.add_field(name="Timestamp", value=datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S UTC"), inline=False)
+                        embed.add_field(name="Timestamp", value=datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S UTC"),
+                                        inline=False)
 
                         await default_channel.send(embed=embed)
                     except Exception as e:
@@ -208,6 +210,37 @@ class LoggingCog(commands.Cog):
                     print("Default logging channel not found.")
             else:
                 print("Default logging channel ID not found.")
+
+    async def send_message_deleted_embed(self, channel, message):
+        if not message.author:
+            return
+
+        embed = discord.Embed(
+            title="Message Deleted",
+            color=discord.Color.red()
+        )
+        embed.add_field(name="Author", value=message.author.mention, inline=False)
+        embed.add_field(name="Channel", value=message.channel.mention, inline=False)
+        embed.add_field(name="Content", value=message.content, inline=False)
+        embed.add_field(name="Timestamp", value=message.created_at.strftime("%Y-%m-%d %H:%M:%S UTC"), inline=False)
+
+        await channel.send(embed=embed)
+
+    @commands.Cog.listener()
+    async def on_message_delete(self, message):
+        guild = message.guild
+
+        default_channel_id = self.load_default_logging_channel(guild.id)
+        if not default_channel_id:
+            return
+
+        default_channel = guild.get_channel(default_channel_id)
+        if not default_channel:
+            return
+
+        # Send message deleted embed to default logging channel
+        await self.send_message_deleted_embed(default_channel, message)
+
 
 async def setup(bot: commands.Bot):
     await bot.add_cog(LoggingCog(bot))
